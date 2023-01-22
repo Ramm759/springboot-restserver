@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     // L'objet bCryptPasswordEncoder permet de hacher les mots de passe pour ne pas les stocker en clair dans la base de données
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    // private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public UserServiceImpl() {
         super();
@@ -39,11 +39,10 @@ public class UserServiceImpl implements UserService {
 
     // TODO ; modif @Autowired
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
         super();
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
@@ -74,16 +73,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly=false)
+    // TODO
     public User saveOrUpdateUser(User user) throws BusinessResourceException{
         try{
-            if(null ==user.getId()) {//pas d'Id --> création d'un user
+            if(null ==user.getId()) {
+                //pas d'Id --> création d'un user
                 addUserRole(user);//Ajout d'un rôle par défaut
-                user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-            } else {//sinon, mise à jour d'un user
+                user.setPassword(user.getPassword());
+            } else {
+                //sinon, mise à jour d'un user
 
                 Optional<User> userFromDB = getUserById(user.getId());
-                if(! bCryptPasswordEncoder.matches(user.getPassword(), userFromDB.get().getPassword())) {
-                    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));//MAJ du mot de passe s'il a été modifié
+                if(! (user.getPassword().equals(userFromDB.get().getPassword()))) {
+                    user.setPassword((user.getPassword()));//MAJ du mot de passe s'il a été modifié
                 } else {
 
                     user.setPassword(userFromDB.get().getPassword());//Sinon, on remet le password déjà haché
@@ -121,7 +123,7 @@ public class UserServiceImpl implements UserService {
     public Optional<User> findByLoginAndPassword(String login, String password) throws BusinessResourceException{
         try {
             Optional<User> userFound = this.findByLogin(login);
-            if(bCryptPasswordEncoder.matches(password, userFound.get().getPassword())) {
+            if(password.equals(userFound.get().getPassword())) {
                 return userFound;
             } else {
                 throw new BusinessResourceException("UserNotFound", "Mot de passe incorrect", HttpStatus.NOT_FOUND);

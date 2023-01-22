@@ -1,4 +1,4 @@
-package com.bnguimgo.springbootrestserver;
+package com.bnguimgo.springbootrestserver.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -7,9 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class RestServices {
+public class DefaultController {
 
-    private static final Logger logger = LoggerFactory.getLogger(RestServices.class);
+    private static final Logger logger = LoggerFactory.getLogger(DefaultController.class);
 
     @GetMapping(value = "/")
     public ResponseEntity<String> pong()
